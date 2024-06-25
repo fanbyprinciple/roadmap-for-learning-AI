@@ -18,8 +18,13 @@ or
 
 ### Training time
 started at 23:09
+step 2000: train loss 1.7640, val loss 1.8925
+saving checkpoint to out-shakespeare-char
+iter 2000: loss 1.6982, time 1443.61ms, mfu 0.01%
 
 >python sample.py --out_dir=out-shakespeare-char
+
+![](2024-06-23-23-48-08.png)
 
 # Error
 
