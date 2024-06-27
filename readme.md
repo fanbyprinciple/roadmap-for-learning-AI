@@ -18,6 +18,10 @@ https://www.youtube.com/watch?v=XS8eRtlcCGU
 
 reading attention is all you need paper.
 
+# day 3
+
+working on speech transcription
+
 
 
 
