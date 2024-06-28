@@ -20,11 +20,12 @@ reading attention is all you need paper.
 
 # day 3
 
-working on speech transcription
+working on speech transcription using google recognition api.
 
 # day 4
 
-hugging face wave vec
+hugging face wave vec. 
+
 
 
 
