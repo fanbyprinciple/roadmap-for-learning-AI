@@ -22,6 +22,9 @@ reading attention is all you need paper.
 
 working on speech transcription
 
+# day 4
+
+hugging face wave vec
 
 
 
