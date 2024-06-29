@@ -24,7 +24,8 @@ working on speech transcription using google recognition api.
 
 # day 4
 
-hugging face wave vec. 
+hugging face wave vec. Understanding th ebigram model.
+
 
 
 
