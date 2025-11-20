@@ -6,10 +6,10 @@ This document contains a set of practical, production-oriented GenAI and Agentic
 
 ## Navigation
 
-* [Index](../README.md)
-* [Timetable](../timetable/README_Timetable.md)
-* [Roadmap](../roadmap/README_Roadmap.md)
-* [60-Day Challenge](../challenge-60-days/README_60_Day_Challenge.md)
+* [Timetable](./README/timetable.md)
+* [Project List](./README/project_List.md)
+* [Roadmap](./README/roadmap.md)
+* [60-Day Challenge](./README/60_Day_Challenge.md)
 
 ---
 

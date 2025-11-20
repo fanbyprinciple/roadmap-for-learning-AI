@@ -29,10 +29,10 @@ This repository contains a structured learning path for mastering Agentic AI Eng
 
 ## Navigation
 
-* [Timetable](../README/timetable.md)
-* [Project List](../README/project_List.md)
-* [Roadmap](../README/roadmap.md)
-* [60-Day Challenge](../README/60_Day_Challenge.md)
+* [Timetable](./README/timetable.md)
+* [Project List](./README/project_List.md)
+* [Roadmap](./README/roadmap.md)
+* [60-Day Challenge](./README/60_Day_Challenge.md)
 
 ## Instructions
 
