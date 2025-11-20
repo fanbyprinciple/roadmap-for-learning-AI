@@ -1,32 +1,41 @@
-# ROADMAP TO AI
+# Agentic AI Engineering Curriculum
 
-This repository aims to compile some of the best tutorials available on youtube ( or otherwise) to learn AI at a fundamental level.
+This repository contains a structured learning path for mastering Agentic AI Engineering. It includes four detailed modules:
 
-# day 1 
+* **Timetable** – Weekly study schedule
+* **Project List** – End‑to‑end project portfolio
+* **Roadmap** – Multi‑phase skill roadmap
+* **60‑Day Challenge** – Daily deliverables for hands‑on mastery
 
-## Training Nanogpt
+## Repository Structure
 
-This is the final repository made from karpathy tutorial.
+```
+/agentic-ai-engineer/
+│
+├── README.md                    # Index Readme (this file)
+│
+├── timetable/
+│   └── README_Timetable.md
+│
+├── project-list/
+│   └── README_Project_List.md
+│
+├── roadmap/
+│   └── README_Roadmap.md
+│
+└── challenge-60-days/
+    └── README_60_Day_Challenge.md
+```
 
-https://www.youtube.com/watch?v=XS8eRtlcCGU
+## Navigation
 
-![](./nano_gpt_songwriter/2024-06-23-23-48-08.png)
+* [Timetable](../README/timetable.md)
+* [Project List](../README/project_List.md)
+* [Roadmap](../README/roadmap.md)
+* [60-Day Challenge](../README/60_Day_Challenge.md)
 
-# day 2
+## Instructions
 
-## Understanding stacking of targets
-
-reading attention is all you need paper.
-
-# day 3
-
-working on speech transcription using google recognition api.
-
-# day 4
-
-hugging face wave vec. Understanding th ebigram model.
-
-
-
-
-
+1. Place each markdown file into the respective folder as shown above.
+2. Ensure all files use plain text without emojis.
+3. Use this index README as the root `README.md` for your GitHub repository.
