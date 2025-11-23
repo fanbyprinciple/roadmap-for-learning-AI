@@ -1,19 +1,3 @@
-# creating a small llm model to work in javascript
-
-https://ampcode.com/how-to-build-an-agent
-
-they made an ai agent in go
-
-https://www.youtube.com/watch?v=nBaGhHipWb0
-
-# vibe coded an AI assistant
-
-![](2025-11-23-15-49-26.png)
-
-creating an undertale setting
-
-![](2025-11-23-16-22-50.png)
-
 # UNDERTALK SLM
 
 Tiny browser thing where a skeleton talks to you using a local LLM.
@@ -99,3 +83,20 @@ I built a drop-in chat widget that handles the model quantization, caching (via 
 Code and technical breakdown in the article below. 👇
 
 #WebAssembly #LLM #EdgeComputing #JavaScript #AIEngineering
+
+# creating a small llm model to work in javascript
+
+https://ampcode.com/how-to-build-an-agent
+
+they made an ai agent in go
+
+https://www.youtube.com/watch?v=nBaGhHipWb0
+
+# vibe coded an AI assistant
+
+![](2025-11-23-15-49-26.png)
+
+creating an undertale setting
+
+![](2025-11-23-16-22-50.png)
+
