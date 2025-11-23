@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLM TALE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        :root {
+            --bg-color: #000000;
+            --border-color: #ffffff;
+            --text-color: #ffffff;
+            --heart-color: #ff0000;
+            --user-text-color: #ffff00;
+            --dim-text: #888888;
+            --ui-font: 'VT323', 'Courier New', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--ui-font);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-size: 24px;
+        }
+
+        #game-container {
+            width: 800px;
+            max-width: 95%;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #scene-area {
+            flex: 1;
+            border: 4px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: black;
+        }
+
+        #avatar-container {
+            width: 120px;
+            height: 120px;
+            image-rendering: pixelated;
+            transition: transform 0.1s;
+        }
+
+        .idle { animation: float 3s ease-in-out infinite; }
+        .talking { animation: shake 0.1s infinite; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        #dialog-box {
+            height: 200px;
+            border: 4px solid var(--border-color);
+            padding: 20px;
+            font-size: 1.2rem;
+            line-height: 1.4;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            scroll-behavior: smooth;
+        }
+
+        .msg { margin-bottom: 12px; }
+
+        .msg.bot::before {
+            content: "* ";
+            color: var(--border-color);
+        }
+
+        .msg.user {
+            color: var(--user-text-color);
+            margin-left: 20px;
+            font-style: italic;
+        }
+        .msg.user::before { content: "> "; }
+
+        .msg.thinking {
+            color: var(--dim-text);
+            animation: pulse-text 1s infinite;
+        }
+
+        @keyframes pulse-text {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        #input-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        #input-area.active { opacity: 1; }
+
+        .soul {
+            width: 16px;
+            height: 16px;
+            background: var(--heart-color);
+            clip-path: polygon(
+                20% 0%, 40% 0%, 50% 20%, 60% 0%, 80% 0%,
+                100% 20%, 100% 50%, 50% 100%, 0% 50%, 0% 20%
+            );
+            display: none;
+        }
+        #input-area.active .soul { display: block; animation: pulse 1s infinite; }
+
+        input[type="text"] {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-family: var(--ui-font);
+            font-size: 1.2rem;
+            width: 100%;
+            outline: none;
+            text-transform: uppercase;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        #loading-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.4s ease;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .pixel-btn {
+            background: transparent;
+            color: white;
+            border: 4px solid white;
+            padding: 15px 30px;
+            font-family: var(--ui-font);
+            font-size: 1.5rem;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        .pixel-btn:hover { background: white; color: black; }
+        .pixel-btn:disabled { opacity: 0.5; cursor: wait; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <h1 style="margin-bottom: 40px; letter-spacing: 5px;">UNDERTALK SLM</h1>
+        <button id="btn-start" class="pixel-btn">START GAME</button>
+        <div id="loading-text" style="margin-top: 20px; font-size: 1rem; color: gray;">Waiting for input...</div>
+    </div>
+
+    <div id="game-container" aria-live="polite">
+        <div id="scene-area">
+            <div id="avatar-container" class="idle">
+                <!-- simple 16x16 skull mapped into 100x100 for crisp pixels -->
+                <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+                    <!-- skull outline -->
+                    <rect x="3" y="1" width="10" height="11" fill="white"/>
+                    <!-- jaw -->
+                    <rect x="4" y="10" width="8" height="3" fill="white"/>
+
+                    <!-- neutral face -->
+                    <g class="face face-neutral">
+                        <!-- eyes -->
+                        <rect x="5" y="4" width="2" height="2" fill="black"/>
+                        <rect x="9" y="4" width="2" height="2" fill="black"/>
+                        <!-- mouth -->
+                        <rect x="6" y="8" width="4" height="1" fill="black"/>
+                    </g>
+
+                    <!-- talking face -->
+                    <g class="face face-talk" style="display:none">
+                        <rect x="5" y="4" width="2" height="2" fill="black"/>
+                        <rect x="9" y="4" width="2" height="2" fill="black"/>
+                        <rect x="6" y="8" width="4" height="2" fill="black"/>
+                    </g>
+
+                    <!-- blink face -->
+                    <g class="face face-blink" style="display:none">
+                        <rect x="5" y="5" width="2" height="1" fill="black"/>
+                        <rect x="9" y="5" width="2" height="1" fill="black"/>
+                        <rect x="6" y="8" width="4" height="1" fill="black"/>
+                    </g>
+
+                    <!-- eye glow overlay -->
+                    <rect id="eye-glow-left" x="5" y="4" width="2" height="2" fill="#00ffff" opacity="0" />
+                    <rect id="eye-glow-right" x="9" y="4" width="2" height="2" fill="#00ffff" opacity="0" />
+                </svg>
+            </div>
+        </div>
+
+        <div id="dialog-box" role="log">
+            <!-- messages -->
+        </div>
+
+        <div id="input-area">
+            <div class="soul"></div>
+            <input type="text" id="user-input" placeholder="..." disabled autocomplete="off">
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { Wllama } from './js/wllama/index.js';
+
+        const getPath = (path) => new URL(path, window.location.href).href;
+
+        const CONFIG_PATHS = {
+            'single-thread/wllama.js': getPath('./js/wllama/single-thread/wllama.js'),
+            'single-thread/wllama.wasm': getPath('./js/wllama/single-thread/wllama.wasm'),
+            'multi-thread/wllama.js': getPath('./js/wllama/multi-thread/wllama.js'),
+            'multi-thread/wllama.wasm': getPath('./js/wllama/multi-thread/wllama.wasm'),
+            'multi-thread/wllama.worker.mjs': getPath('./js/wllama/multi-thread/wllama.worker.mjs'),
+        };
+
+        const MODEL_URL = getPath('./models/smollm2-360m-instruct-q8_0.gguf');
+
+        const SYSTEM_PROMPT = `
+you are a quirky, mysterious skeleton character, Timbolo.
+your job is to help the narrator escape the dungeon.
+you speak in short, lower-case sentences. you love puns.
+
+rules:
+1. keep it short (under 40 words).
+2. end with a question or prompt for action.
+3. do not break character.
+`;
+
+        let wllama;
+        let isModelLoaded = false;
+        let isBusy = false;
+        let conversationHistory = [{ role: 'system', content: SYSTEM_PROMPT }];
+
+        const ui = {
+            screen: document.getElementById('loading-screen'),
+            btnStart: document.getElementById('btn-start'),
+            loadText: document.getElementById('loading-text'),
+            dialogBox: document.getElementById('dialog-box'),
+            input: document.getElementById('user-input'),
+            inputArea: document.getElementById('input-area'),
+            avatar: document.getElementById('avatar-container'),
+            eyeGlowLeft: document.getElementById('eye-glow-left'),
+            eyeGlowRight: document.getElementById('eye-glow-right')
+        };
+
+        function appendMessage(role, text, id = null) {
+            const div = document.createElement('div');
+            div.className = `msg ${role}`;
+            if (id) div.id = id;
+            div.textContent = text;
+            ui.dialogBox.appendChild(div);
+            ui.dialogBox.scrollTop = ui.dialogBox.scrollHeight;
+            return div;
+        }
+
+        function getRandomThinkingText() {
+            const phrases = [
+                "* (the skeleton stares at you intensely...)",
+                "* (bones rattling in thought...)",
+                "* (thinking of a good pun...)",
+                "* (the skeleton tilts its head...)",
+                "* (loading bone_jokes.exe...)"
+            ];
+            return phrases[Math.floor(Math.random() * phrases.length)];
+        }
+
+        function normalizeResponse(raw) {
+            let text = (raw || '').trim().toLowerCase();
+            if (!text) return 'uh. bones empty up there. try again?';
+
+            const maxChars = 200; // ~40 words on average
+            if (text.length > maxChars) {
+                text = text.slice(0, maxChars);
+                // cut back to last space so you don't split a word
+                const lastSpace = text.lastIndexOf(' ');
+                if (lastSpace > 0) text = text.slice(0, lastSpace);
+            }
+
+            if (!/[?!]$/.test(text)) text += '?';
+            return text;
+            }
+
+        function setFace(state) {
+            const faces = document.querySelectorAll('.face');
+            faces.forEach(f => f.style.display = 'none');
+            const active = document.querySelector(`.face-${state}`);
+            if (active) active.style.display = 'block';
+        }
+
+        async function initGame() {
+            if (isModelLoaded) return;
+            ui.btnStart.disabled = true;
+            ui.btnStart.textContent = 'LOADING...';
+
+            try {
+                ui.loadText.textContent = "* initializing wasm core...";
+                wllama = new Wllama(CONFIG_PATHS);
+
+                ui.loadText.textContent = "* downloading brain (380mb)...";
+                await wllama.loadModelFromUrl(MODEL_URL, {
+                    n_ctx: 2048,
+                    progressCallback: ({ loaded, total }) => {
+                        const pct = Math.round((loaded / total) * 100);
+                        ui.loadText.textContent = `* downloading... ${pct}%`;
+                    }
+                });
+
+                isModelLoaded = true;
+                ui.loadText.textContent = "* ready. waking up skeleton...";
+                ui.btnStart.textContent = 'STARTED';
+
+                // fade out loading screen
+                ui.screen.classList.add('hidden');
+                setTimeout(() => {
+                    ui.screen.style.display = 'none';
+                }, 400);
+
+                // intro line
+                const intro = "heya. nice soul you got there. what now?";
+                appendMessage('bot', intro);
+                conversationHistory.push({ role: 'assistant', content: intro });
+
+                ui.input.disabled = false;
+                ui.inputArea.classList.add('active');
+                ui.input.focus();
+            } catch (e) {
+                console.error(e);
+                ui.loadText.textContent = "* error: load failed.";
+                ui.loadText.style.color = "red";
+                ui.btnStart.disabled = false;
+                ui.btnStart.textContent = 'RETRY';
+
+                if (wllama && wllama.cacheManager && confirm("Load failed. Clear cache?")) {
+                    await wllama.cacheManager.clear();
+                    window.location.reload();
+                }
+            }
+        }
+
+        async function generateTurn(playerAction) {
+            if (!isModelLoaded || isBusy) return;
+
+            const text = playerAction.trim();
+            if (!text) return;
+
+            isBusy = true;
+
+            ui.input.disabled = true;
+            ui.input.value = "";
+            ui.inputArea.classList.remove('active');
+
+            appendMessage('user', text);
+            conversationHistory.push({ role: 'user', content: text });
+
+            ui.eyeGlowLeft.setAttribute('opacity', '0.8');
+            ui.eyeGlowRight.setAttribute('opacity', '0.8');
+            setFace('blink');
+
+            const thinkingId = "thinking-" + Date.now();
+            const thinkingNode = appendMessage('thinking', getRandomThinkingText(), thinkingId);
+
+            try {
+                const generator = await wllama.createChatCompletion(conversationHistory, {
+                    nPredict: 150,
+                    sampling: { temp: 0.8, top_p: 0.9 },
+                    stream: true
+                });
+
+                thinkingNode.remove();
+
+                ui.avatar.classList.remove('idle');
+                ui.avatar.classList.add('talking');
+                setFace('talk');
+
+                const botMsgNode = appendMessage('bot', "");
+                let fullResponse = "";
+
+                for await (const chunk of generator) {
+                    const piece = new TextDecoder().decode(chunk.piece);
+                    fullResponse += piece;
+                    botMsgNode.textContent = fullResponse;
+                    ui.dialogBox.scrollTop = ui.dialogBox.scrollHeight;
+                }
+
+                const normalized = normalizeResponse(fullResponse);
+                botMsgNode.textContent = normalized;
+                conversationHistory.push({ role: 'assistant', content: normalized });
+
+            } catch (e) {
+                console.error(e);
+                if (thinkingNode) {
+                    thinkingNode.textContent = "* (the connection was lost in the void.)";
+                }
+            } finally {
+                isBusy = false;
+                ui.avatar.classList.remove('talking');
+                ui.avatar.classList.add('idle');
+                setFace('neutral');
+                ui.eyeGlowLeft.setAttribute('opacity', '0');
+                ui.eyeGlowRight.setAttribute('opacity', '0');
+
+                ui.input.disabled = false;
+                ui.inputArea.classList.add('active');
+                ui.input.focus();
+            }
+        }
+
+        ui.btnStart.addEventListener('click', initGame);
+
+        ui.input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const value = ui.input.value;
+                if (value.trim()) {
+                    generateTurn(value);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

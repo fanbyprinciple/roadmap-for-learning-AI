@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wllama Widget Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Demo page styling (ignore this when embedding) */
+        body { background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        h1 { color: #334155; }
+    </style>
+</head>
+<body>
+
+    <h1>Website Content Goes Here...</h1>
+
+    <!-- ============================================================ -->
+    <!-- START WLLAMA WIDGET MODULE -->
+    <!-- Copy from here to embed in other sites -->
+    <!-- ============================================================ -->
+    
+    <div id="wllama-widget-container">
+        <style>
+            #wllama-widget-container {
+                --wl-bg: #ffffff;
+                --wl-header: #4f46e5;
+                --wl-text: #1e293b;
+                --wl-text-light: #f8fafc;
+                --wl-border: #e2e8f0;
+                --wl-accent: #4f46e5;
+                --wl-user-msg: #4f46e5;
+                --wl-bot-msg: #f1f5f9;
+                --wl-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 9999;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            }
+
+            /* Toggle Button */
+            #wl-toggle-btn {
+                width: 60px;
+                height: 60px;
+                background-color: var(--wl-accent);
+                border-radius: 50%;
+                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                transition: transform 0.2s;
+            }
+            #wl-toggle-btn:hover { transform: scale(1.05); }
+            #wl-toggle-btn svg { width: 30px; height: 30px; }
+
+            /* Main Box */
+            #wl-chat-box {
+                width: 350px;
+                height: 500px;
+                background: var(--wl-bg);
+                border-radius: 16px;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                position: absolute;
+                bottom: 80px;
+                right: 0;
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(20px);
+                transition: all 0.2s ease-in-out;
+                border: 1px solid var(--wl-border);
+            }
+
+            #wl-chat-box.open {
+                opacity: 1;
+                pointer-events: auto;
+                transform: translateY(0);
+            }
+
+            /* Header */
+            .wl-header {
+                background: var(--wl-header);
+                padding: 16px;
+                color: white;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .wl-title { font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+            
+            .wl-status-dot {
+                width: 8px; height: 8px; background: #ccc; border-radius: 50%;
+                display: inline-block;
+            }
+            .wl-status-dot.online { background: #34d399; box-shadow: 0 0 8px #34d399; }
+            .wl-status-dot.loading { background: #fbbf24; animation: wl-pulse 1s infinite; }
+            .wl-status-dot.error { background: #ef4444; }
+
+            /* Chat Area */
+            #wl-messages {
+                flex: 1;
+                padding: 16px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                background: #f8fafc;
+            }
+
+            .wl-msg {
+                max-width: 85%;
+                padding: 10px 14px;
+                border-radius: 12px;
+                font-size: 14px;
+                line-height: 1.5;
+                word-wrap: break-word;
+                animation: wl-fade 0.2s forwards;
+            }
+            
+            .wl-msg.bot {
+                background: var(--wl-bot-msg);
+                color: var(--wl-text);
+                border-top-left-radius: 2px;
+                align-self: flex-start;
+                border: 1px solid #e2e8f0;
+            }
+            
+            .wl-msg.user {
+                background: var(--wl-user-msg);
+                color: white;
+                border-top-right-radius: 2px;
+                align-self: flex-end;
+            }
+
+            /* Input Area */
+            .wl-footer {
+                padding: 12px;
+                border-top: 1px solid var(--wl-border);
+                background: white;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            /* Load Button Overlay */
+            #wl-init-overlay {
+                text-align: center;
+                padding: 10px;
+                background: #f1f5f9;
+                border-radius: 8px;
+                margin-bottom: 8px;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            .wl-btn {
+                background: var(--wl-accent);
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-weight: 600;
+                cursor: pointer;
+                width: 100%;
+            }
+            .wl-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+            
+            .wl-input-group { display: flex; gap: 8px; }
+            #wl-input {
+                flex: 1;
+                padding: 10px;
+                border: 1px solid var(--wl-border);
+                border-radius: 8px;
+                outline: none;
+            }
+            #wl-input:focus { border-color: var(--wl-accent); }
+
+            /* Reset Link */
+            .wl-reset {
+                font-size: 10px;
+                text-align: center;
+                color: #94a3b8;
+                text-decoration: underline;
+                cursor: pointer;
+            }
+
+            @keyframes wl-pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+            @keyframes wl-fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        </style>
+
+        <!-- Chat Box -->
+        <div id="wl-chat-box">
+            <div class="wl-header">
+                <div class="wl-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    AI Assistant
+                </div>
+                <div id="wl-status-dot" class="wl-status-dot" title="Status"></div>
+            </div>
+
+            <div id="wl-messages">
+                <div class="wl-msg bot">Hi! Click "Load Brain" to start running the AI locally on your device.</div>
+            </div>
+
+            <div class="wl-footer">
+                <div id="wl-init-overlay">
+                    <button id="wl-btn-load" class="wl-btn">Load Brain (~380MB)</button>
+                    <div class="wl-reset" onclick="wlResetCache()">Reset Cache</div>
+                </div>
+                
+                <div class="wl-input-group">
+                    <input type="text" id="wl-input" placeholder="Type a message..." disabled autocomplete="off">
+                    <button id="wl-btn-send" class="wl-btn" style="width: auto;" disabled>→</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Toggle Button -->
+        <button id="wl-toggle-btn" onclick="wlToggleChat()">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        </button>
+    </div>
+
+    <script type="module">
+        import { Wllama } from './js/wllama/index.js';
+
+        // --- CONFIGURATION ---
+        const getPath = (path) => new URL(path, window.location.href).href;
+        
+        const CONFIG_PATHS = {
+            'single-thread/wllama.wasm': getPath('./js/wllama/single-thread/wllama.wasm'),
+            'multi-thread/wllama.wasm': getPath('./js/wllama/multi-thread/wllama.wasm'),
+        };
+        const MODEL_URL = getPath('./models/smollm2-360m-instruct-q8_0.gguf');
+
+        // --- STATE ---
+        let wllama;
+        let isModelLoaded = false;
+        let isGenerating = false;
+        let isOpen = false;
+        let conversationHistory = [
+            { role: 'system', content: "You are a helpful AI assistant." }
+        ];
+
+        // --- DOM ELEMENTS ---
+        const ui = {
+            box: document.getElementById('wl-chat-box'),
+            msgs: document.getElementById('wl-messages'),
+            input: document.getElementById('wl-input'),
+            btnLoad: document.getElementById('wl-btn-load'),
+            btnSend: document.getElementById('wl-btn-send'),
+            overlay: document.getElementById('wl-init-overlay'),
+            status: document.getElementById('wl-status-dot')
+        };
+
+        // --- LOGGING HELPER ---
+        function log(msg, data = '') {
+            console.log(`%c[Wllama Widget] ${msg}`, 'color: #4f46e5; font-weight: bold;', data);
+        }
+        function logError(msg, err) {
+            console.error(`%c[Wllama Widget] ERROR: ${msg}`, 'color: #ef4444; font-weight: bold;', err);
+        }
+
+        // --- INITIALIZATION ---
+        async function init() {
+            log('Initializing Wllama...', CONFIG_PATHS);
+            try {
+                wllama = new Wllama(CONFIG_PATHS);
+                log('Wllama instance created successfully.');
+            } catch (e) {
+                logError('Failed to initialize Wllama class', e);
+                updateStatus('error');
+                addMessage('bot', 'Error: Could not initialize WebAssembly. Check console.');
+            }
+        }
+
+        // --- LOAD MODEL ---
+        async function loadModel() {
+            if (!wllama) return;
+            
+            ui.btnLoad.disabled = true;
+            ui.btnLoad.textContent = "Downloading...";
+            updateStatus('loading');
+            log('Starting model download...', MODEL_URL);
+
+            try {
+                await wllama.loadModelFromUrl(MODEL_URL, {
+                    n_ctx: 2048,
+                    progressCallback: ({ loaded, total }) => {
+                        const pct = Math.round((loaded / total) * 100);
+                        if (pct % 10 === 0) log(`Download progress: ${pct}%`);
+                        ui.btnLoad.textContent = `Downloading ${pct}%...`;
+                    }
+                });
+
+                log('Model loaded successfully!');
+                isModelLoaded = true;
+                updateStatus('online');
+                
+                // UI Update
+                ui.overlay.style.display = 'none';
+                ui.input.disabled = false;
+                ui.btnSend.disabled = false;
+                ui.input.focus();
+                addMessage('bot', 'System ready. How can I help?');
+
+            } catch (e) {
+                logError('Model load failed', e);
+                updateStatus('error');
+                ui.btnLoad.textContent = "Retry Load";
+                ui.btnLoad.disabled = false;
+                alert("Load failed. Check console for details.");
+            }
+        }
+
+        // --- CHAT LOGIC ---
+        async function handleSend() {
+            const text = ui.input.value.trim();
+            if (!text || isGenerating) return;
+
+            log('User sent message:', text);
+            
+            // UI Updates
+            ui.input.value = '';
+            ui.input.disabled = true;
+            addMessage('user', text);
+            conversationHistory.push({ role: 'user', content: text });
+
+            // Bot Placeholder
+            const botId = addMessage('bot', '...');
+            const botElem = document.getElementById(botId);
+            isGenerating = true;
+            let fullResponse = "";
+
+            try {
+                log('Starting inference...');
+                const generator = await wllama.createChatCompletion(conversationHistory, {
+                    nPredict: 300,
+                    sampling: { temp: 0.4, top_p: 0.9 },
+                    stream: true
+                });
+
+                botElem.textContent = ""; // Clear placeholder
+
+                for await (const chunk of generator) {
+                    const piece = new TextDecoder().decode(chunk.piece);
+                    fullResponse += piece;
+                    botElem.textContent = fullResponse;
+                    scrollToBottom();
+                }
+                
+                log('Inference complete. Response length:', fullResponse.length);
+                conversationHistory.push({ role: 'assistant', content: fullResponse });
+
+            } catch (e) {
+                logError('Inference error', e);
+                botElem.textContent = "Error generating response.";
+            } finally {
+                isGenerating = false;
+                ui.input.disabled = false;
+                ui.input.focus();
+            }
+        }
+
+        // --- HELPERS ---
+        function addMessage(role, text) {
+            const id = 'msg-' + Date.now();
+            const div = document.createElement('div');
+            div.className = `wl-msg ${role}`;
+            div.id = id;
+            div.textContent = text;
+            ui.msgs.appendChild(div);
+            scrollToBottom();
+            return id;
+        }
+
+        function scrollToBottom() { ui.msgs.scrollTop = ui.msgs.scrollHeight; }
+
+        function updateStatus(status) {
+            ui.status.className = `wl-status-dot ${status}`;
+        }
+
+        // --- GLOBAL HANDLERS ---
+        window.wlToggleChat = () => {
+            isOpen = !isOpen;
+            ui.box.classList.toggle('open', isOpen);
+            log(isOpen ? 'Widget opened' : 'Widget closed');
+        };
+
+        window.wlResetCache = async () => {
+            if(confirm("Clear model cache? This fixes corrupted downloads.")) {
+                log('Clearing cache...');
+                if(wllama) await wllama.cacheManager.clear();
+                window.location.reload();
+            }
+        };
+
+        // --- EVENT LISTENERS ---
+        ui.btnLoad.addEventListener('click', loadModel);
+        ui.btnSend.addEventListener('click', handleSend);
+        ui.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
+
+        // Start
+        init();
+    </script>
+    <!-- ============================================================ -->
+    <!-- END WLLAMA WIDGET MODULE -->
+    <!-- ============================================================ -->
+
+</body>
+</html>
